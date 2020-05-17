@@ -111,7 +111,7 @@ def cramerV(x, y, data):
     x2, p, dof, e=st.chi2_contingency(table, False)
     
     n=table.sum().sum()
-    r=x2/(n*(np.min(table.shape)-1))
+    r=np.sqrt(x2/(n*(np.min(table.shape)-1)))
 
     return r
 
@@ -127,30 +127,27 @@ def get_corr(data, categorical_keys=None):
     corr_ratio=pd.DataFrame({})
     corr_cramer=pd.DataFrame({})
         
-    try:
-        for key1 in keys:
-            for key2 in keys:
+    for key1 in keys:
+        for key2 in keys:
 
-                if (key1 in categorical_keys) and (key2 in categorical_keys):
+            if (key1 in categorical_keys) and (key2 in categorical_keys):
 
-                    r=cramerV(key1, key2, data)
-                    corr_cramer.loc[key1, key2]=r                
+                r=cramerV(key1, key2, data)
+                corr_cramer.loc[key1, key2]=r                
 
-                elif (key1 in categorical_keys) and (key2 not in categorical_keys):
+            elif (key1 in categorical_keys) and (key2 not in categorical_keys):
 
-                    r=correlation_ratio(cat_key=key1, num_key=key2, data=data)
-                    corr_ratio.loc[key1, key2]=r                
+                r=correlation_ratio(cat_key=key1, num_key=key2, data=data)
+                corr_ratio.loc[key1, key2]=r                
 
-                elif (key1 not in categorical_keys) and (key2 in categorical_keys):
+            elif (key1 not in categorical_keys) and (key2 in categorical_keys):
 
-                    r=correlation_ratio(cat_key=key2, num_key=key1, data=data)
-                    corr_ratio.loc[key1, key2]=r                
+                r=correlation_ratio(cat_key=key2, num_key=key1, data=data)
+                corr_ratio.loc[key1, key2]=r                
 
-                else:
+            else:
 
-                    r=data.corr().loc[key1, key2]
-                    corr.loc[key1, key2]=r                
-    except:
-        print(key1, key2)
-            
+                r=data.corr().loc[key1, key2]
+                corr.loc[key1, key2]=r                
+        
     return corr, corr_ratio, corr_cramer
