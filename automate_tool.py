@@ -26,9 +26,15 @@ def is_categorical(data, key):
     else:
         return True
     
-def visualize_data(data, target_col):
-    
-    for key in data.keys():
+def visualize_data(data, target_col, categorical_keys=None):
+     
+    keys=data.keys()
+        
+    if categorical_keys is None:
+        
+        categorical_keys=keys[[is_categorical(data, key) for key in keys]]
+   
+    for key in keys:
         
         if key==target_col:
             continue
@@ -36,36 +42,48 @@ def visualize_data(data, target_col):
         length=10
         subplot_size=(length, length/2)
         
-        if is_categorical(data, key) and is_categorical(data, target_col):
+        if (key in categorical_keys) and (target_col in categorical_keys):
 
+            r=cramerV(key, target_col, data)
+            
             fig, axes=plt.subplots(1, 2, figsize=subplot_size)
             sns.countplot(x=key, data=data, ax=axes[0])
             sns.countplot(x=key, data=data, hue=target_col, ax=axes[1])
+            plt.title(r)
             plt.tight_layout()
             plt.show()
 
-        elif is_categorical(data, key) and not is_categorical(data, target_col):
+        elif (key in categorical_keys) and not (target_col in categorical_keys):
 
+            r=correlation_ratio(cat_key=key, num_key=target_col, data=data)
+            
             fig, axes=plt.subplots(1, 2, figsize=subplot_size)
             sns.countplot(x=key, data=data, ax=axes[0])
             sns.violinplot(x=key, y=target_col, data=data, ax=axes[1])
+            plt.title(r)
             plt.tight_layout()
             plt.show()
 
-        elif not is_categorical(data, key) and is_categorical(data, target_col):
+        elif not (key in categorical_keys) and (target_col in categorical_keys):
 
-            fig, axes=plt.subplots(1, 2, figsize=subplot_size)
+            r=correlation_ratio(cat_key=target_col, num_key=key, data=data)
+            
+            fig, axes=plt.subplots(1, 2, figsize=subplot_size)            
             sns.distplot(data[key], ax=axes[0], kde=False)
             g=sns.FacetGrid(data, hue=target_col)
             g.map(sns.distplot, key, ax=axes[1], kde=False)
-            axes[1].legend()
+            axes[1].set_title(r)
+            axes[1].legend()            
             plt.tight_layout()
             plt.close()
             plt.show()
 
         else:
 
-            sns.jointplot(x=key, y=target_col, data=data, height=length*2/3)
+            r=data.corr().loc[key, target_col]
+            
+            sg=sns.jointplot(x=key, y=target_col, data=data, height=length*2/3)
+            plt.title(r)
             plt.show()            
 
 def summarize_data(df):
