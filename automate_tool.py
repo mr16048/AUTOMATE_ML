@@ -10,6 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import scipy.stats as st
+from sklearn.metrics import mean_squared_error as mse
 
 def is_categorical(data, key):
     
@@ -169,3 +170,48 @@ def get_corr(data, categorical_keys=None):
                 corr.loc[key1, key2]=r                
         
     return corr, corr_ratio, corr_cramer
+
+def get_pred_ratio(y_real, y_pred):
+    
+    ratios=[]
+    
+    for real, pred in zip(y_real, y_pred):
+        
+        if real!=0:
+            ratio=abs(real-pred)/real
+        else:
+            ratio=abs(real-pred)
+            
+        ratios.append(ratio)
+        
+    return ratios
+
+def eval_regression(y_pred, y_real):
+
+    y_ratio=get_pred_ratio(y_real, y_pred)
+
+    percent=[50, 75, 90]
+    ratio_p=[]
+
+    for p in percent:
+        ratio_p.append(np.percentile(y_ratio, p))
+
+    print('mse: ', mse(y_pred, y_real))
+    for p, r in zip(percent, ratio_p):
+        print('error {0}%: {1}'.format(p, r))
+    
+    plt.figure(figsize=(10, 5))
+    plt.subplot(1, 2, 1)
+    plt.plot(y_real, y_pred, 'bo')
+    plt.plot(y_real, y_real, 'r')
+    plt.xlabel('real', fontsize=12)
+    plt.ylabel('predeiction', fontsize=12)
+    
+    plt.subplot(1, 2, 2)
+    plt.plot(percent, ratio_p, 'bo')
+    plt.xlim([0, 100])
+    plt.ylim([0, 1])
+    plt.xlabel('Percent (%)', fontsize=12)
+    plt.ylabel('Prediction ratio', fontsize=12)
+    
+    plt.subplots_adjust(wspace=0.7)
