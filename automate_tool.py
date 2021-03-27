@@ -37,7 +37,7 @@ def visualize_data(data, target_col, categorical_keys=None, hue=None):
    
     for key in keys:
         
-        if key==target_col:
+        if key==target_col or key==hue:
             continue
             
         length=10
@@ -215,3 +215,19 @@ def eval_regression(y_pred, y_real):
     plt.ylabel('Prediction ratio', fontsize=12)
     
     plt.subplots_adjust(wspace=0.7)
+    
+def wrong_rate(data, target_key, pred, real):
+    
+    first_key=data.keys()[0]
+    if first_key==target_key:
+        first_key=data.keys()[1]
+    
+    wrong=pred!=real
+    data_wrong=data[wrong]
+    data_wrong_group=data_wrong.groupby(target_key).count()[first_key].reset_index().rename(columns={first_key: 'Count'}).set_index(target_key)
+    
+    data_count=data.groupby(target_key)[first_key].count().reset_index().rename(columns={first_key: 'Count'}).set_index(target_key)
+    
+    data_wrong_group/=data_count
+    
+    return data_wrong_group
