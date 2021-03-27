@@ -27,7 +27,7 @@ def is_categorical(data, key):
     else:
         return True
     
-def visualize_data(data, target_col, categorical_keys=None):
+def visualize_data(data, target_col, categorical_keys=None, hue=None):
      
     keys=data.keys()
         
@@ -49,7 +49,7 @@ def visualize_data(data, target_col, categorical_keys=None):
             
             fig, axes=plt.subplots(1, 2, figsize=subplot_size)
             sns.countplot(x=key, data=data, ax=axes[0])
-            sns.countplot(x=key, data=data, hue=target_col, ax=axes[1])
+            sns.catplot(x=key, data=data, hue=target_col, row=hue, kind='count')
             plt.title(r)
             plt.tight_layout()
             plt.show()
@@ -60,7 +60,7 @@ def visualize_data(data, target_col, categorical_keys=None):
             
             fig, axes=plt.subplots(1, 2, figsize=subplot_size)
             sns.countplot(x=key, data=data, ax=axes[0])
-            sns.violinplot(x=key, y=target_col, data=data, ax=axes[1])
+            sns.violinplot(x=key, y=target_col, data=data, ax=axes[1], hue=hue)
             plt.title(r)
             plt.tight_layout()
             plt.show()
@@ -71,7 +71,7 @@ def visualize_data(data, target_col, categorical_keys=None):
             
             fig, axes=plt.subplots(1, 2, figsize=subplot_size)            
             sns.distplot(data[key], ax=axes[0], kde=False)
-            g=sns.FacetGrid(data, hue=target_col)
+            g=sns.FacetGrid(data, hue=target_col, col=hue)
             g.map(sns.distplot, key, ax=axes[1], kde=False)
             axes[1].set_title(r)
             axes[1].legend()            
@@ -83,9 +83,9 @@ def visualize_data(data, target_col, categorical_keys=None):
 
             r=data.corr().loc[key, target_col]
             
-            sg=sns.jointplot(x=key, y=target_col, data=data, height=length*2/3)
+            sg=sns.jointplot(x=key, y=target_col, data=data, height=length*2/3, hue=hue)
             plt.title(r)
-            plt.show()            
+            plt.show()                 
 
 def summarize_data(df):
 
